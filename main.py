@@ -110,3 +110,4 @@ while cap.isOpened(): # 캡처 객체 초기화 확인 cap 객체가 지정한 �
   cv2.imshow('result', img) # img 화면에 표시
   if cv2.waitKey(1) == ord('q'): # 1ms 의 지연을 주면서 화면에 표시, q 누르면 break
     break
+
