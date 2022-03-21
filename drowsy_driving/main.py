@@ -1,6 +1,7 @@
-import cv2 , dlib ,winsound
+import cv2 , dlib ,winsound 
 import numpy as np
 from imutils import face_utils
+from PIL import Image
 
 
 import os 
@@ -14,12 +15,31 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 
 
+from PIL import Image
+import face_recognition
+
+
+# # Load the jpg file into a numpy array
+# image = face_recognition.load_image_file("two_hero.jpg")
+
+# # Find all the faces in the image using the default HOG-based model.
+# # This method is fairly accurate, but not as accurate as the CNN model and not GPU accelerated.
+# # See also: find_faces_in_picture_cnn.py
+
+# face_locations = face_recognition.face_locations(image)
+
+# print("I found {} face(s) in this photograph.".format(len(face_locations)))
+
+
+
 IMG_SIZE = (34,26)
+FACE_SIZE=(64,64)
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('68_landmarks/shape_predictor_68_face_landmarks.dat') # dlib에서 제공한 데이터 셋
 
-model = tf.keras.models.load_model('models/blink_or_not.h5')
+model = tf.keras.models.load_model('models/blink_or_not_ver2.h5')
+model_smile=tf.keras.models.load_model('models/smile_or_not.h5')
 model.summary()
 
 def crop_eye(img, eye_points):
@@ -41,8 +61,10 @@ def crop_eye(img, eye_points):
 
   return eye_img, eye_rect
 
+
 # main
 count=0
+
 
 
 cap = cv2.VideoCapture(0,cv2.CAP_DSHOW) # 캡쳐 객체 생성
@@ -69,7 +91,7 @@ while cap.isOpened(): # 캡처 객체 초기화 확인 cap 객체가 지정한 �
 
   for face in faces: # 얼굴이 여러개 있을 수도 있으니까 (추측)
     shapes = predictor(gray, face)
-    shapes = face_utils.shape_to_np(shapes)   
+    shapes = face_utils.shape_to_np(shapes) 
     # def shape_to_np(shape, dtype="int"):
 	# # initialize the list of (x, y)-coordinates
 	# coords = np.zeros((shape.num_parts, 2), dtype=dtype)
@@ -81,9 +103,13 @@ while cap.isOpened(): # 캡처 객체 초기화 확인 cap 객체가 지정한 �
 
 	# # return the list of (x, y)-coordinates
 	# return coords
-    
+
+  
+#-------------------------------------eyes--------------------------------------------------------------------------   
     eye_img_l, eye_rect_l = crop_eye(gray, eye_points=shapes[36:42]) # number 37~42 왼쪽 눈  (shape_predictor_68_face_landmarks 데이터셋)
     eye_img_r, eye_rect_r = crop_eye(gray, eye_points=shapes[42:48]) # 43~48 오른쪽 눈
+
+
 
     eye_img_l = cv2.resize(eye_img_l, dsize=IMG_SIZE) # 모델에 넣기 위해 사이즈 변경
     eye_img_r = cv2.resize(eye_img_r, dsize=IMG_SIZE) # 모델에 넣기 위해 사이즈 변경
@@ -94,24 +120,46 @@ while cap.isOpened(): # 캡처 객체 초기화 확인 cap 객체가 지정한 �
 
     eye_input_l = eye_img_l.copy().reshape((1, IMG_SIZE[1], IMG_SIZE[0], 1)).astype(np.float32) / 255.# 모델에 넣기 위해 사이즈 변경 , 노멀라이징
     eye_input_r = eye_img_r.copy().reshape((1, IMG_SIZE[1], IMG_SIZE[0], 1)).astype(np.float32) / 255.# 모델에 넣기 위해 사이즈 변경 , 노멀라이징
+    
+#---------------------------------------face-----------------------------------------------------------------------
+    
+    face_img = gray[face.top():face.bottom(), face.left():face.right()]
 
+    face_img=cv2.resize(face_img,dsize=FACE_SIZE)
+
+    face_input=face_img.copy().reshape((1, FACE_SIZE[1], FACE_SIZE[0], 1)).astype(np.float32) / 255.
+
+
+#---------------------------------------------------------------------------------------------------------------------
     pred_l = model.predict(eye_input_l)
     pred_r = model.predict(eye_input_r) # 모델에 삽입
 
+    pred_face = model_smile.predict(face_input)
 
 
     # visualize
    
     state_l = ' %.1f' % pred_l
     state_r = ' %.1f' % pred_r
+    
+
+    state_f=' %.1f' % pred_face
+
+    #face
+
+    cv2.rectangle(img, (face.left(), face.top()), (face.right(), face.bottom()), (0,0,255), 2)
+    cv2.putText(img, state_f, (face.left(),face.bottom()), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
 
 
+    #eyes
     cv2.rectangle(img, pt1=tuple(eye_rect_l[0:2]), pt2=tuple(eye_rect_l[2:4]), color=(255,255,255), thickness=2)
     cv2.rectangle(img, pt1=tuple(eye_rect_r[0:2]), pt2=tuple(eye_rect_r[2:4]), color=(255,255,255), thickness=2)
 
     cv2.putText(img, state_l, tuple(eye_rect_l[0:2]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
     cv2.putText(img, state_r, tuple(eye_rect_r[0:2]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
 
+  if pred_face > 0.01:
+    count=0
   
   if pred_l and pred_r < 0.3:
     count += 1
