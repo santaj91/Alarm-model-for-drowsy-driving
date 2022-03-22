@@ -143,7 +143,7 @@ while cap.isOpened(): # 캡처 객체 초기화 확인 cap 객체가 지정한 �
     state_r = ' %.1f' % pred_r
     
 
-    state_f=' %.1f' % pred_face
+    state_f=' %.2f' % pred_face
 
     #face
 
@@ -161,7 +161,7 @@ while cap.isOpened(): # 캡처 객체 초기화 확인 cap 객체가 지정한 �
   if pred_face > 0.01:
     count=0
   
-  if pred_l and pred_r < 0.3:
+  if pred_l < 0.6 or pred_r < 0.6:
     count += 1
   else:
     count=0
