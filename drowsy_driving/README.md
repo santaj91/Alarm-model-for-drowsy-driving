@@ -10,7 +10,7 @@ This model makes a sound when driver's eyes are closed for a few seconds. To mak
 # Models
 
 ## Eye detector
-At first, i trained only closing eye detector with eyes of Westerners. But i recognized that it didn't work when driver was asian. So i retrained with asian's eyes that i cropped from asian dataset with opencv. And than this model is able to detect asian's eye.
+At first, i trained only closing eye detector with eyes of Westerners. But i recognized that it didn't work when driver is asian. So i retrained with asian's eyes that i cropped from asian dataset with opencv. And than this model is able to detect asian's eye.
 
 ## Smile detector
 Another challenge occured when driver smiles. smiling face can make human's eyes smaller than before. so this algorithms could malfunction. To protect this, i added smile detector. so when the algorithm detect a human smiling, a counter which can calculate how long driver's eyes are closed become a zero.
