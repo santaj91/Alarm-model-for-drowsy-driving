@@ -16,7 +16,7 @@ At first, i trained only closing eye detector with eyes of Westerners. But i rec
 Another challenge occured when driver smiles. smiling face can make human's eyes smaller than before. so this algorithms could malfunction. To protect this, i added smile detector. so when the algorithm detect a human smiling, a counter which can calculate how long driver's eyes are closed become a zero.
 
 ## Algorithm
-A counter counts numbers continuously when the driver's eyes are closed. when counter become the number of ten, a Alram makes sound. If driver open eyes before the counter become the number of ten and the detector can found the driver smiling , the counter becomes zero.  
+A counter counts numbers continuously when the driver's eyes are closed. when counter become the number of ten, a Alram makes sound. If the driver opens eyes before the counter become the number of ten and the detector can found the driver smiling , the counter becomes zero.  
 
 # Dataset
 
