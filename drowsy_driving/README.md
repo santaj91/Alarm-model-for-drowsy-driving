@@ -7,7 +7,7 @@ This model makes a sound when driver's eyes are closed for a few seconds. To mak
 ![drowsy_AdobeExpress (1)](https://user-images.githubusercontent.com/93965016/180709045-3df84649-b35e-4fb1-b203-1a9c7f0ce8e6.gif)
 
 
-#Models
+# Models
 
 ## Eye detector
 At first, i trained only closing eye detector with eyes of Westerners. But i recognized that it didn't work when driver was asian. So i retrained with asian's eyes that i cropped from asian dataset with opencv. And than this model is able to detect asian's eye.
